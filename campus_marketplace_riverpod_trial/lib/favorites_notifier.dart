@@ -14,6 +14,9 @@ class FavoritesNotifier extends StateNotifier<List<Item>> {
   void remove(Item item) =>
       state = state.where((i) => i.id != item.id).toList();
 
+  // ล้างรายการโปรดทั้งหมด แทนที่ state ด้วยลิสต์ว่างใหม่
+  void clear() => state = [];
+
   double get totalValue => state.fold(0, (sum, i) => sum + i.price);
 }
 

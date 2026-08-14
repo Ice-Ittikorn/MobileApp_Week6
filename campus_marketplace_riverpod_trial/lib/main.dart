@@ -45,13 +45,89 @@ class _HomePageState extends ConsumerState<HomePage> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: Text('❤️ ${savedItems.length}')),
+      appBar: AppBar(
+        title: Text('❤️ ${savedItems.length}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const FavoritesPage()),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _SearchField(onChanged: (value) => setState(() => _query = value)),
           Expanded(child: ItemListSection(items: filteredItems)),
         ],
       ),
+    );
+  }
+}
+
+class FavoritesPage extends ConsumerWidget {
+  const FavoritesPage({super.key});
+
+  Future<void> _confirmClear(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('ล้างรายการโปรดทั้งหมด?'),
+        content: const Text('การกระทำนี้จะลบรายการโปรดทั้งหมดออก และไม่สามารถย้อนกลับได้'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ล้างทั้งหมด'),
+          ),
+        ],
+      ),
+    );
+
+    // ยืนยันแล้วค่อยสั่งแก้ state จริง (context.read เพราะเป็นการสั่งครั้งเดียว ไม่ต้อง rebuild ตาม)
+    if (confirmed == true) {
+      ref.read(favoritesProvider.notifier).clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // ref.watch เพราะหน้านี้ต้อง rebuild ตามจำนวนรายการโปรดที่เปลี่ยนไป
+    // (ทั้งตัวลิสต์ที่แสดง และเงื่อนไขว่าจะโชว์ปุ่มล้างรายการหรือไม่)
+    final savedItems = ref.watch(favoritesProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('รายการโปรด'),
+        actions: [
+          if (savedItems.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'ล้างรายการโปรดทั้งหมด',
+              onPressed: () => _confirmClear(context, ref),
+            ),
+        ],
+      ),
+      body: savedItems.isEmpty
+          ? const Center(child: Text('ยังไม่มีรายการโปรด'))
+          : ListView(
+              children: savedItems
+                  .map(
+                    (item) => ListTile(
+                      title: Text(item.title),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () =>
+                            ref.read(favoritesProvider.notifier).remove(item),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }
