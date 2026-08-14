@@ -66,8 +66,17 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 }
 
-class FavoritesPage extends ConsumerWidget {
+// เหมือนกับ HomePage: ใช้ ConsumerStatefulWidget เพราะต้องอ่าน favoritesProvider
+// (ref) และคำค้นหาของหน้านี้เป็น Ephemeral State ของหน้านี้เองเช่นเดียวกัน
+class FavoritesPage extends ConsumerStatefulWidget {
   const FavoritesPage({super.key});
+
+  @override
+  ConsumerState<FavoritesPage> createState() => _FavoritesPageState();
+}
+
+class _FavoritesPageState extends ConsumerState<FavoritesPage> {
+  String _query = '';
 
   Future<void> _confirmClear(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -88,17 +97,24 @@ class FavoritesPage extends ConsumerWidget {
       ),
     );
 
-    // ยืนยันแล้วค่อยสั่งแก้ state จริง (context.read เพราะเป็นการสั่งครั้งเดียว ไม่ต้อง rebuild ตาม)
+    // ยืนยันแล้วค่อยสั่งแก้ state จริง (ref.read เพราะเป็นการสั่งครั้งเดียว ไม่ต้อง rebuild ตาม)
     if (confirmed == true) {
       ref.read(favoritesProvider.notifier).clear();
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     // ref.watch เพราะหน้านี้ต้อง rebuild ตามจำนวนรายการโปรดที่เปลี่ยนไป
-    // (ทั้งตัวลิสต์ที่แสดง และเงื่อนไขว่าจะโชว์ปุ่มล้างรายการหรือไม่)
+    // (ทั้งตัวลิสต์ที่แสดง และเงื่อนไขว่าจะโชว์ปุ่มล้างรายการหรือไม่ ซึ่งอิงจากลิสต์เต็ม ไม่ใช่ลิสต์ที่กรองแล้ว)
     final savedItems = ref.watch(favoritesProvider);
+
+    final filteredItems = savedItems
+        .where(
+          (item) =>
+              item.title.toLowerCase().contains(_query.toLowerCase()),
+        )
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -114,19 +130,29 @@ class FavoritesPage extends ConsumerWidget {
       ),
       body: savedItems.isEmpty
           ? const Center(child: Text('ยังไม่มีรายการโปรด'))
-          : ListView(
-              children: savedItems
-                  .map(
-                    (item) => ListTile(
-                      title: Text(item.title),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () =>
-                            ref.read(favoritesProvider.notifier).remove(item),
-                      ),
-                    ),
-                  )
-                  .toList(),
+          : Column(
+              children: [
+                _SearchField(
+                  onChanged: (value) => setState(() => _query = value),
+                ),
+                Expanded(
+                  child: ListView(
+                    children: filteredItems
+                        .map(
+                          (item) => ListTile(
+                            title: Text(item.title),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () => ref
+                                  .read(favoritesProvider.notifier)
+                                  .remove(item),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
     );
   }
