@@ -1,4 +1,4 @@
-# campus_marketplace_riverpod_trial
+# campus_marketplace
 
 A new Flutter project.
 

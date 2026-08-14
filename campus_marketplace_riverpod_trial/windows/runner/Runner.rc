@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "campus_marketplace_riverpod_trial" "\0"
+            VALUE "FileDescription", "campus_marketplace" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "campus_marketplace_riverpod_trial" "\0"
+            VALUE "InternalName", "campus_marketplace" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "campus_marketplace_riverpod_trial.exe" "\0"
-            VALUE "ProductName", "campus_marketplace_riverpod_trial" "\0"
+            VALUE "OriginalFilename", "campus_marketplace.exe" "\0"
+            VALUE "ProductName", "campus_marketplace" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

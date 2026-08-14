@@ -1,6 +1,6 @@
 {
-    "name": "campus_marketplace_riverpod_trial",
-    "short_name": "campus_marketplace_riverpod_trial",
+    "name": "campus_marketplace",
+    "short_name": "campus_marketplace",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
